@@ -15,6 +15,7 @@ from keras.layers import Flatten
 class SingleModel(object):
 
     def __init__(self, top_words=5000, dimention=32, max_words=500):
+
         self.model = Sequential()
         self.model.add(Embedding(top_words, dimention, input_length=max_words))
         self.model.add(Flatten())
@@ -35,6 +36,8 @@ class SingleModel(object):
         return self.x_train, self.y_train, self.x_test, self.y_test
 
     def train(self):
+        """ trains model"""
+
         # Fit the model
         self.model.fit(self.x_train, self.y_train, validation_data=(self.x_test, self.y_test),
                        epochs=2, batch_size=128, verbose=2)
@@ -44,6 +47,7 @@ class SingleModel(object):
 
     def store_model(self):
         """ serializes model"""
+
         self.model_json = self.model.to_json()
         with open("model.json", "w") as json_file:
             json_file.write(self.model_json)
@@ -64,12 +68,15 @@ class SingleModel(object):
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     def evaluate_model(self):
+        """ evaluates model"""
+
         self.load_model()
         score = self.model.evaluate(self.x_test, self.y_test, verbose=0)
         print("Accuracy: %.2f%%" % (score[1] * 100))
         gc.collect()
 
 
-SingleModel()
-SingleModel().evaluate_model()
+if __name__ == "__main__":
+    SingleModel()
+    SingleModel().evaluate_model()
 
