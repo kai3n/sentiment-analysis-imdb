@@ -1,27 +1,33 @@
 import re
+import os
 import codecs
 import numpy as np
 
 from keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.text import Tokenizer
 
 MAX_WORDS = 500
 
 class Vocabulary(object):
 
-    def __init__(self, vocab_path='dataset/imdb.vocab'):
-        self.vocab = dict()
-        self.vocab_path = vocab_path
+    def __init__(self):
+        pass
 
     def build(self):
-        with codecs.open(self.vocab_path, 'r', 'UTF-8') as trainfile:
-            words = [x.strip().rstrip('\n') for x in trainfile.readlines()]
-            self.vocab = dict((c, i + 1) for i, c in enumerate(words))
+        #  TODO: save this as a file
+        self.imdbTokenizer = Tokenizer(num_words=4999)
+        self.vocab = []
+        path = 'dataset/train/pos/'
+        self.vocab.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
+        path = 'dataset/train/neg/'
+        self.vocab.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
+        self.imdbTokenizer.fit_on_texts(self.vocab)
         return self
 
     def size(self):
         return len(self.vocab)
 
-    def refine(self, text):
+    def _refine(self, text):
         """Remove impurities from the text"""
 
         text = re.sub(r"[^A-Za-z0-9!?\'\`]", " ", text)
@@ -42,20 +48,13 @@ class Vocabulary(object):
         text = re.sub(r"\s{2,}", " ", text)
         return text.lower()
 
-    def pad(self, X):
-        return pad_sequences(X, maxlen=500)
-
-    def tokenize(self, text):
-        text = self.refine(text)
-        return [x.strip() for x in re.split('(\W+)', text) if x.strip()]
-
     def vectorize(self, text):
-        words = filter(lambda x: x in self.vocab, self.tokenize(text))
-        words = [self.vocab[w] for w in words]
-        words = np.array(words).reshape((1, len(words)))
-        words = pad_sequences(words, maxlen=MAX_WORDS)
-        return words
+        text = self._refine(text)
+        text = self.imdbTokenizer.texts_to_sequences([text])
+        text = pad_sequences(text, maxlen=MAX_WORDS)
+        return text
 
 if __name__ == "__main__":
     test = Vocabulary().build()
-    print(test.vectorize("i love you"))
+    test.imdbTokenizer.texts_to_sequences(["I love you"])
+    test = pad_sequences(test, maxlen=MAX_WORDS)
