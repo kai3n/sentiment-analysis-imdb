@@ -4,8 +4,8 @@ from vocabulary import Vocabulary
 from single_model import SingleModel
 
 class Classifier(object):
-    def __init__(self, model=None, max_words=500):
-        self.target_model = model()
+    def __init__(self, model=None, filename=None, max_words=500):
+        self.target_model = model(filename)
         self.vocab = Vocabulary()
         self.max_words = max_words
 
@@ -20,7 +20,7 @@ class Classifier(object):
         return X[0]
 
 if __name__ == "__main__":
-    a = Classifier(model=SingleModel)
+    a = Classifier(model=SingleModel, filename="single_84.588acc_model.h5")
     a.build()
     print(a.predict("i love you"))
 
