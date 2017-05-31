@@ -14,8 +14,7 @@ class Vocabulary(object):
         pass
 
     def build(self):
-        #  TODO: save this as a file
-        self.imdbTokenizer = Tokenizer(num_words=4999)
+        self.imdbTokenizer = Tokenizer(num_words=5000)
         self.vocab = []
         path = 'dataset/train/pos/'
         self.vocab.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
