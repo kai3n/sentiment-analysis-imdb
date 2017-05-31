@@ -13,6 +13,7 @@ print(" - Starting up application")
 app = Flask(__name__)
 CORS(app)
 
+
 # Define a route for the default URL, which loads the form
 @app.route('/', methods=['POST'])
 def predict_with_ajax():
@@ -22,6 +23,7 @@ def predict_with_ajax():
     print(review_text)
     print(prediction)
     return str(prediction.tolist()[0])
+
 
 @app.route('/', methods=['GET'])
 def main():
