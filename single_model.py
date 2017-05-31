@@ -1,16 +1,8 @@
-# -*- coding: utf-8 -*-
-
-import numpy as np
-import gc
-import re
-
-from keras.datasets import imdb
-from keras.preprocessing import sequence
 from keras.layers.embeddings import Embedding
 from keras.models import Sequential
-from keras.models import model_from_json
 from keras.layers import Dense
 from keras.layers import Flatten
+
 
 class SingleModel(object):
     def __init__(self, filename):
