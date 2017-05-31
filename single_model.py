@@ -13,8 +13,9 @@ from keras.layers import Dense
 from keras.layers import Flatten
 
 class SingleModel(object):
-    def __init__(self):
+    def __init__(self, filename):
         self.model = None
+        self.weights_filename = filename
 
     def build(self):
         model = Sequential()
@@ -23,8 +24,9 @@ class SingleModel(object):
         model.add(Dense(250, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
 
-        model.load_weights("model.h5")
+        model.load_weights(self.weights_filename)
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        print(model.summary())
         self.model = model
 
         return self
