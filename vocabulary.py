@@ -1,21 +1,21 @@
 import re
 import os
-import codecs
-import numpy as np
 
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 
 MAX_WORDS = 500
 
+
 class Vocabulary(object):
 
     def __init__(self):
+        self.vocab = []
+        self.imdbTokenizer = None
         pass
 
     def build(self):
         self.imdbTokenizer = Tokenizer(num_words=5000)
-        self.vocab = []
         path = 'dataset/train/pos/'
         self.vocab.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
         path = 'dataset/train/neg/'
@@ -26,7 +26,8 @@ class Vocabulary(object):
     def size(self):
         return len(self.vocab)
 
-    def _refine(self, text):
+    @staticmethod
+    def _refine(text):
         """Remove impurities from the text"""
 
         text = re.sub(r"[^A-Za-z0-9!?\'\`]", " ", text)
@@ -55,5 +56,6 @@ class Vocabulary(object):
 
 if __name__ == "__main__":
     test = Vocabulary().build()
-    test.imdbTokenizer.texts_to_sequences(["I love you"])
+    test = test.vectorize("I love you")
     test = pad_sequences(test, maxlen=MAX_WORDS)
+    print(test)
