@@ -3,6 +3,7 @@ import gc
 from vocabulary import Vocabulary
 from single_model import SingleModel
 
+
 class Classifier(object):
     def __init__(self, model=None, filename=None, max_words=500):
         self.target_model = model(filename)
