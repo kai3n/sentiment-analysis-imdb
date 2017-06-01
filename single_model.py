@@ -5,22 +5,17 @@ from keras.layers import Flatten
 
 
 class SingleModel(object):
-    def __init__(self, filename):
+    def __init__(self):
         self.model = None
-        self.weights_filename = filename
 
-    def build(self):
+    def build(self, max_features=20000, maxlen=500, embedding_dims=100, hidden_dims=250):
         model = Sequential()
-        model.add(Embedding(5000, 32, input_length=500))
+        model.add(Embedding(max_features, embedding_dims, input_length=maxlen))
         model.add(Flatten())
-        model.add(Dense(250, activation='relu'))
+        model.add(Dense(hidden_dims, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
-
-        model.load_weights(self.weights_filename)
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         print(model.summary())
         self.model = model
 
         return self
-
-

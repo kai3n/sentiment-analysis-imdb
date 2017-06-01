@@ -31,7 +31,7 @@ def main():
 
 # Run the app :)
 if __name__ == '__main__':
-    movie_review_classifier = Classifier(model=SingleModel, filename="single_84.588acc_model.h5")
+    movie_review_classifier = Classifier(filename="single_84.588acc_model")
     movie_review_classifier.build()
 
     app.run(
