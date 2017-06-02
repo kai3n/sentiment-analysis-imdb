@@ -1,7 +1,7 @@
 # Sentiment Analysis project with imdb
 
-This project analyses your sentiment through the review you typed on the page.
-If you get green background, that means you have the positive review. Red backround is the opposite.
+The goal of this project is to analys your sentiment through the review typed on the page.
+If the background turns into green, that means you have the positive review. Red is the opposite.
 
 ## Getting Started
 
