@@ -7,6 +7,9 @@ from single_model import SingleModel
 from cnn_model import CNNModel
 from lstm_and_cnn_model import LSTMAndCNNModel
 from lstm_model import LSTMModel
+from simple_model import SimpleModel
+from gru_model import GRUModel
+
 import numpy as np
 np.random.seed(1337)  # for reproducibility
 
@@ -15,19 +18,20 @@ from keras.preprocessing.text import Tokenizer
 
 
 class Manager(object):
-    def __init__(self, ngram_range=1):
+    def __init__(self, ngram_range=1, max_features=20000):
         self.model = None
         self.X_train = []
         self.y_train = []
         self.X_test = []
         self.y_test = []
         self.scores = 0
-        self.max_features = 0
+        self.max_features = max_features
         self.ngram_range = ngram_range
         # create int to word dictionary
         self.intToWord = {}
+        self.embedding_matrix = None
 
-    def load_dataset(self, max_features=20000, max_len=500):
+    def load_dataset(self, max_len=500, embedding_dims=100):
         """Loads dataset. Before execute this function,
         get dataset and unzip: http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz"""
 
@@ -40,15 +44,6 @@ class Manager(object):
         self.X_train.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
         self.y_train.extend([0 for _ in range(12500)])
 
-        print('x:')
-        print(self.X_train[:1])
-        print(self.X_train[-1:])
-        print(len(self.X_train))
-        print('y:')
-        print(self.y_train[:1])
-        print(self.y_train[-1:])
-        print(len(self.y_train))
-
         # read in the test data
         path = 'dataset/test/pos/'
         self.X_test.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
@@ -58,18 +53,33 @@ class Manager(object):
         self.X_test.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
         self.y_test.extend([0 for _ in range(12500)])
 
-        print('x:')
-        print(self.X_test[:1])
-        print(self.X_test[-1:])
-        print(len(self.X_test))
-        print('y:')
-        print(self.y_test[:1])
-        print(self.y_test[-1:])
-        print(len(self.y_test))
-
         # tokenize works to list of integers where each integer is a key to a word
-        imdbTokenizer = Tokenizer(num_words=max_features)
+        imdbTokenizer = Tokenizer(num_words=self.max_features)
         imdbTokenizer.fit_on_texts(self.X_train)
+
+        word_index = imdbTokenizer.word_index
+
+        embeddings_index = {}
+        f = open(os.path.join('glove.6B/', 'glove.6B.100d.txt'))
+        for line in f:
+            values = line.split()
+            word = values[0]
+            coefs = np.asarray(values[1:], dtype='float32')
+            embeddings_index[word] = coefs
+        f.close()
+
+        # prepare embedding matrix
+        self.max_features = min(self.max_features, len(word_index))
+
+        embedding_matrix = np.zeros((self.max_features, embedding_dims))
+        for word, i in word_index.items():
+            if i >= self.max_features:
+                continue
+            embedding_vector = embeddings_index.get(word)
+            if embedding_vector is not None:
+                # words not found in embedding index will be all-zeros.
+                embedding_matrix[i] = embedding_vector
+        self.embedding_matrix = embedding_matrix
 
         # add a symbol for null placeholder
         self.intToWord[0] = "!!!NA!!!"
@@ -94,7 +104,7 @@ class Manager(object):
             # Dictionary mapping n-gram token to a unique integer.
             # Integer values are greater than max_features in order
             # to avoid collision with existing features.
-            start_index = max_features + 1
+            start_index = self.max_features + 1
             token_indice = {v: k + start_index for k, v in enumerate(ngram_set)}
             indice_token = {token_indice[k]: k for k in token_indice}
 
@@ -116,10 +126,6 @@ class Manager(object):
 
         self.y_train = np.array(self.y_train)
         self.y_test = np.array(self.y_test)
-
-        # example of a sentence sequence, note that lower integers are words that occur more commonly
-        print("x:", self.X_train[0])  # per observation vector of 20000 words
-        print("y:", self.y_train[0])  # positive or negative review encoding
 
         # double check that word sequences behave/final dimensions are as expected
         print("y distribution:", np.unique(self.y_train, return_counts=True))
@@ -162,10 +168,12 @@ class Manager(object):
         print("Loaded model from disk")
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    def create_ngram_set(self, input_list, ngram_value=2):
+    @staticmethod
+    def create_ngram_set(input_list, ngram_value=2):
         return set(zip(*[input_list[i:] for i in range(ngram_value)]))
 
-    def add_ngram(self, sequences, token_indice, ngram_range=2):
+    @staticmethod
+    def add_ngram(sequences, token_indice, ngram_range=2):
         new_sequences = []
         for input_list in sequences:
             new_list = input_list[:]
@@ -180,115 +188,11 @@ class Manager(object):
 
 
 if __name__ == "__main__":
-    # single model
-    # model = SingleModel().build().model
-    # manager = Manager(model)
-    # manager.load_dataset(max_features=20000)
-    # manager.train()
-    # manager.store_model("single")
-
-    # cnn model
+    # cnn and bi-gram model
     manager = Manager(ngram_range=2)
     manager.load_dataset()
-    model = CNNModel().build(manager.max_features).model
+    model = CNNModel().build(embedding_matrix=manager.embedding_matrix,
+                             max_features=manager.max_features).model
     manager.train(model)
-    manager.store_model("cnn")
-
-    #lstm model
-    # model = LSTMModel().build().model
-    # manager = Manager(model)
-    # manager.load_dataset(max_features=5000)
-    # manager.train()
-    # manager.store_model("lstm")
-
-    # model = LSTMAndCNNModel().build().model
-    # manager = Manager(model)
-    # manager.load_dataset(max_features=5000)
-    # manager.train()
-    # manager.store_model("lstm_and_cnn")
-
-
-    # MAX_SEQUENCE_LENGTH = 500
-    # MAX_NB_WORDS = 5000
-    # EMBEDDING_DIM = 100
-    # VALIDATION_SPLIT = 0.2
-    # X_train = []
-    # y_train = []
-    # X_test = []
-    # y_test = []
-    #
-    # # read in the train data
-    # path = 'dataset/train/pos/'
-    # X_train.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
-    # y_train.extend([1 for _ in range(12500)])
-    #
-    # path = 'dataset/train/neg/'
-    # X_train.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
-    # y_train.extend([0 for _ in range(12500)])
-    #
-    # # read in the test data
-    # path = 'dataset/test/pos/'
-    # X_test.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
-    # y_test.extend([1 for _ in range(12500)])
-    #
-    # path = 'dataset/test/neg/'
-    # X_test.extend([open(path + f).read() for f in os.listdir(path) if f.endswith('.txt')])
-    # y_test.extend([0 for _ in range(12500)])
-    #
-    # # finally, vectorize the text samples into a 2D integer tensor
-    # tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
-    # tokenizer.fit_on_texts(X_train)
-    #
-    # X_train = tokenizer.texts_to_sequences(X_train)
-    # X_train = pad_sequences(X_train, maxlen=MAX_SEQUENCE_LENGTH)
-    #
-    # X_test = tokenizer.texts_to_sequences(X_test)
-    # X_test = pad_sequences(X_test, maxlen=MAX_SEQUENCE_LENGTH)
-    #
-    # y_train = np.array(y_train)
-    # y_test = np.array(y_test)
-    #
-    # word_index = tokenizer.word_index
-    #
-    # embeddings_index = {}
-    # f = open(os.path.join('glove.6B/', 'glove.6B.100d.txt'))
-    # for line in f:
-    #     values = line.split()
-    #     word = values[0]
-    #     coefs = np.asarray(values[1:], dtype='float32')
-    #     embeddings_index[word] = coefs
-    # f.close()
-    #
-    # # prepare embedding matrix
-    # num_words = min(MAX_NB_WORDS, len(word_index))
-    # embedding_matrix = np.zeros((num_words, EMBEDDING_DIM))
-    # for word, i in word_index.items():
-    #     if i >= MAX_NB_WORDS:
-    #         continue
-    #     embedding_vector = embeddings_index.get(word)
-    #     if embedding_vector is not None:
-    #         # words not found in embedding index will be all-zeros.
-    #         embedding_matrix[i] = embedding_vector
-    #
-    # # load pre-trained word embeddings into an Embedding layer
-    # # note that we set trainable = False so as to keep the embeddings fixed
-    # embedding_layer = Embedding(num_words,
-    #                             EMBEDDING_DIM,
-    #                             weights=[embedding_matrix],
-    #                             input_length=MAX_SEQUENCE_LENGTH,
-    #                             trainable=False)
-    # model = Sequential()
-    # model.add(embedding_layer)
-    # model.add(Flatten())
-    # model.add(Dense(250, activation='relu'))
-    # model.add(Dense(1, activation='sigmoid'))
-    # model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    #
-    # model.fit(X_train, y_train, validation_data=(X_test, y_test),
-    #                epochs=2, batch_size=128, verbose=2)
-    # # Final evaluation of the model
-    # scores = model.evaluate(X_test, y_test, verbose=0)
-    # print("Accuracy: %.2f%%" % (scores[1] * 100))
-
-
+    manager.store_model("cnn_and_bi-gram")
 
