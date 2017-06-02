@@ -10,7 +10,11 @@ python demo_server.py
 ```
 
 Next, once you go to the root page of your server, you will get this page.
-[![Demo page](demopage.png){ width=50% }
+![Demo page](demopage.png)
+
+You can just type the review of what you watched recently for the test.
+![test1](good.gif)
+![test1](bad.gif)
 
 ### Prerequisites
 
