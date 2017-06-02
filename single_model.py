@@ -8,9 +8,13 @@ class SingleModel(object):
     def __init__(self):
         self.model = None
 
-    def build(self, max_features=20000, maxlen=500, embedding_dims=100, hidden_dims=250):
+    def build(self, embedding_matrix, max_features=20000, maxlen=500, embedding_dims=100, hidden_dims=250):
         model = Sequential()
-        model.add(Embedding(max_features, embedding_dims, input_length=maxlen))
+        model.add(Embedding(max_features,
+                            embedding_dims,
+                            weights=[embedding_matrix],
+                            input_length=maxlen,
+                            trainable=True))
         model.add(Flatten())
         model.add(Dense(hidden_dims, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
