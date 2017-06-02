@@ -1,22 +1,24 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.layers import Embedding
-from keras.layers import Conv1D, GlobalMaxPooling1D
+from keras.layers import Conv1D, GlobalMaxPooling1D, GlobalAveragePooling1D
 
 
 class CNNModel(object):
     def __init__(self):
         self.model = None
 
-    def build(self, max_features=20000, maxlen=500, embedding_dims=32, filters=10,
-              kernel_size=3, hidden_dims=10):
+    def build(self, embedding_matrix, max_features=20000, maxlen=500, embedding_dims=100, filters=250,
+              kernel_size=3, hidden_dims=250):
         model = Sequential()
 
         # we start off with an efficient embedding layer which maps
         # our vocab indices into embedding_dims dimensions
         model.add(Embedding(max_features,
                             embedding_dims,
-                            input_length=maxlen))
+                            weights=[embedding_matrix],
+                            input_length=maxlen,
+                            trainable=True))
         model.add(Dropout(0.2))
 
         # we add a Convolution1D, which will learn filters
@@ -26,8 +28,8 @@ class CNNModel(object):
                          padding='valid',
                          activation='relu',
                          strides=1))
-        # we use max pooling:
-        model.add(GlobalMaxPooling1D())
+        # we use average pooling:
+        model.add(GlobalAveragePooling1D())
 
         # We add a vanilla hidden layer:
         model.add(Dense(hidden_dims))
