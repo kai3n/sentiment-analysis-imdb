@@ -25,6 +25,10 @@ This open source is based on Python 3.5
 pip install -r requirement.txt
 ```
 
+IMDb Dataset: `http://ai.stanford.edu/~amaas/data/sentiment/`
+
+GloVe pre-trained vector: `https://nlp.stanford.edu/projects/glove/`
+
 ### Training
 
 
