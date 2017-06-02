@@ -12,8 +12,8 @@ python demo_server.py
 Next, once you go to the root page of your server, you will get the simple page.
 You can just type the review of what you watched recently for the test.
 
-<img src="good.gif" style="float: left;" width="400px" height="300px"/>
-<img src="bad.gif" style="float: right;" width="400px" height="300px"/>
+<img src="good.gif" style="float: left;display:inline;" width="400px" height="300px"/>
+<img src="bad.gif" style="float: left; display:inline;" width="400px" height="300px"/>
 
 ### Prerequisites
 
@@ -94,39 +94,3 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * Hat tip to anyone who's code was used
 * Inspiration
 * etc
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
