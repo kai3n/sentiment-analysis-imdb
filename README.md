@@ -9,12 +9,11 @@ Demo server is based on Flask. To run the server, execute demo_server.py
 python demo_server.py
 ```
 
-Next, once you go to the root page of your server, you will get this page.
-![Demo page](demopage.png)
-
+Next, once you go to the root page of your server, you will get the simple page.
 You can just type the review of what you watched recently for the test.
-![test1](good.gif)
-![test1](bad.gif)
+
+<img src="good.gif" style="float: left;" width="300px" height="200px"/>
+<img src="bad.gif" style="float: left;" width="300px" height="200px"/>
 
 ### Prerequisites
 
