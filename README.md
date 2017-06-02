@@ -25,7 +25,7 @@ This open source is based on Python 3.5
 pip install -r requirement.txt
 ```
 
-### training
+### Training
 
 
 ```python
