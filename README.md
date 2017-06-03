@@ -49,7 +49,7 @@ An n-gram is a contiguous sequence of n items from a given sequence of text. You
 
 ```python
 if __name__ == '__main__':
-    movie_review_classifier = Classifier(filename="single_84.588acc_model")
+    movie_review_classifier = Classifier(filename="cnn_and_bi-gram_90.484acc_model")
     movie_review_classifier.build()
 
     app.run(
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     )
 ```
 
-Once you trained, you would get your own model. In this example, I will use the simple model that has 84.588 accuracy. Go to `demo_server.py` and set up your model. Make sure you should take off the file extension. That's all. Run it!!:)
+Once you trained, you would get your own model. In this example, I will use the cnn model that has 90.484 accuracy. Go to `demo_server.py` and set up your model. Make sure you should take off the file extension. That's all. Run it!!:)
 
 ## Running the tests
 
