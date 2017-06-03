@@ -111,6 +111,18 @@ class Manager(object):
             # max_features is the highest integer that could be found in the dataset.
             self.max_features = np.max(list(indice_token.keys())) + 1
 
+            # prepare embedding matrix
+
+            embedding_matrix = np.zeros((self.max_features, embedding_dims))
+            for word, i in word_index.items():
+                if i >= self.max_features:
+                    continue
+                embedding_vector = embeddings_index.get(word)
+                if embedding_vector is not None:
+                    # words not found in embedding index will be all-zeros.
+                    embedding_matrix[i] = embedding_vector
+            self.embedding_matrix = embedding_matrix
+
             # Augmenting x_train and x_test with n-grams features
             self.X_train = self.add_ngram(self.X_train, token_indice, self.ngram_range)
             self.X_test = self.add_ngram(self.X_test, token_indice, self.ngram_range)
