@@ -208,3 +208,6 @@ if __name__ == "__main__":
     manager.train(model)
     manager.store_model("cnn_and_bi-gram")
 
+
+
+
